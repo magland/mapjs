@@ -31,7 +31,8 @@ MAPJS.pngExport = function (idea) {
 			x: n.x,
 			y: n.y,
 			text: n.title,
-			mmAttr: n.attr
+			mmAttr: n.attr,
+			jfm_is_leaf: (n.attr||{}).jfm_is_leaf //jfm
 		});
 		nodeByIdeaId[n.id] = node;
 		layer.add(node);

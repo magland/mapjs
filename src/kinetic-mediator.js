@@ -156,7 +156,8 @@ MAPJS.KineticMediator = function (mapModel, stage) {
 			mmAttr: n.attr,
 			opacity: 1,
 			id: 'node_' + n.id,
-			activated: n.activated
+			activated: n.activated,
+			jfm_is_leaf: (n.attr||{}).jfm_is_leaf //jfm
 		});
 		node.on('click tap', function (evt) { mapModel.clickNode(n.id, evt); });
 		node.on('dblclick dbltap', function () {

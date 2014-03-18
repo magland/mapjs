@@ -50,7 +50,8 @@
 	}
 
 	function createClip() {
-		var group, clip, props = {width: 5, height: 25, radius: 3, rotation: 0.1, strokeWidth: 2, clipTo: 10};
+		//jfm: changed clipTo to save space (originally 10)
+		var group, clip, props = {width: 5, height: 25, radius: 3, rotation: 0.1, strokeWidth: 2, clipTo: 5};
 		group = new Kinetic.Group();
 		group.getClipMargin = function () {
 			return props.clipTo;
@@ -164,7 +165,7 @@
 		this.text = new Kinetic.Text({
 			fontSize: 12,
 			fontFamily: 'Helvetica',
-			lineHeight: 1.5,
+			lineHeight: 1, //jfm changed the lineHeight from 1.5 to 1 -> this helps with centering of text
 			fontStyle: 'bold',
 			align: 'center'
 		});
@@ -374,9 +375,12 @@ Kinetic.Idea.prototype.setStyle = function () {
 		tintedBackground = Color(background).mix(Color('#EEEEEE')).hexString(),
 		rectOffset,
 		rectIncrement = 4,
-		padding = 8,
+		//jfm: split padding into xpadding and ypadding
+		//padding = 8, //jfm: affects padding around an idea rectangle
+		xpadding=8,
+		ypadding=6,
 		isClipVisible = self.mmAttr && self.mmAttr.attachment,
-		clipMargin = isClipVisible ? self.clip.getClipMargin() : 0,
+		clipMargin = isClipVisible ? self.clip.getClipMargin() : 0, //additional space required if there is a paper clip (attachment)
 		getDash = function () {
 			if (!self.isActivated) {
 				return [];
@@ -390,8 +394,8 @@ Kinetic.Idea.prototype.setStyle = function () {
 		calculatedSize,
 		pad = function (box) {
 			return {
-				width: box.width + 2 * padding,
-				height: box.height + 2 * padding
+				width: box.width + 2 * xpadding, //jfm: padding -> xpadding
+				height: box.height + 2 * ypadding //jfm: padding -> ypadding
 			};
 		},
 		positionTextAndIcon = function () {
@@ -403,37 +407,37 @@ Kinetic.Idea.prototype.setStyle = function () {
 				self.icon.setX((calculatedSize.width - self.icon.getWidth()) / 2);
 			} else if (iconPos === 'bottom') {
 				self.text.setX((calculatedSize.width - self.text.getWidth()) / 2);
-				self.text.setY(clipMargin + padding);
-				self.icon.setY(clipMargin + calculatedSize.height - self.icon.getHeight() - padding);
+				self.text.setY(clipMargin + ypadding); //jfm: padding -> ypadding
+				self.icon.setY(clipMargin + calculatedSize.height - self.icon.getHeight() - ypadding); //jfm: padding -> ypadding
 				self.icon.setX((calculatedSize.width - self.icon.getWidth()) / 2);
 			} else if (iconPos === 'top') {
 				self.text.setX((calculatedSize.width - self.text.getWidth()) / 2);
-				self.icon.setY(clipMargin + padding);
-				self.text.setY(clipMargin + calculatedSize.height - self.text.getHeight() - padding);
+				self.icon.setY(clipMargin + ypadding); //jfm: padding -> ypadding
+				self.text.setY(clipMargin + calculatedSize.height - self.text.getHeight() - ypadding); //jfm: padding -> ypadding
 				self.icon.setX((calculatedSize.width - self.icon.getWidth()) / 2);
 			} else if (iconPos === 'left') {
-				self.text.setX(calculatedSize.width - self.text.getWidth() - padding);
+				self.text.setX(calculatedSize.width - self.text.getWidth() - xpadding);
 				self.text.setY((calculatedSize.height - self.text.getHeight()) / 2 + clipMargin);
 				self.icon.setY((calculatedSize.height - self.icon.getHeight()) / 2 + clipMargin);
-				self.icon.setX(padding);
+				self.icon.setX(xpadding);
 			} else if (iconPos === 'right') {
 				self.text.setY((calculatedSize.height - self.text.getHeight()) / 2 + clipMargin);
-				self.text.setX(padding);
+				self.text.setX(xpadding);
 				self.icon.setY((calculatedSize.height - self.icon.getHeight()) / 2 + clipMargin);
-				self.icon.setX(calculatedSize.width - self.icon.getWidth() - padding);
+				self.icon.setX(calculatedSize.width - self.icon.getWidth() - xpadding);
 			}
 		},
 		calculateMergedBoxSize = function (box1, box2) {
 			if (box2.position === 'bottom' || box2.position === 'top') {
 				return {
-					width: Math.max(box1.width, box2.width) + 2 * padding,
-					height: box1.height + box2.height + 3 * padding
+					width: Math.max(box1.width, box2.width) + 2 * xpadding,
+					height: box1.height + box2.height + 3 * ypadding
 				};
 			}
 			if (box2.position === 'left' || box2.position === 'right') {
 				return {
-					width: box1.width + box2.width + 3 * padding,
-					height: Math.max(box1.height, box2.height) + 2 * padding
+					width: box1.width + box2.width + 3 * xpadding,
+					height: Math.max(box1.height, box2.height) + 2 * ypadding
 				};
 			}
 			return pad({
@@ -446,18 +450,23 @@ Kinetic.Idea.prototype.setStyle = function () {
 	} else {
 		calculatedSize = pad(textSize);
 	}
+	var jfm_extra_height=30;
+	if (this.mmAttr.jfm_is_leaf) jfm_extra_height=0;
+	calculatedSize.height+=jfm_extra_height;
+	
 	this.icon.updateMapjsAttribs(self.mmAttr && self.mmAttr.icon);
 
 	this.clip.setVisible(clipMargin);
 	this.setWidth(calculatedSize.width);
 	this.setHeight(calculatedSize.height + clipMargin);
-	this.link.setX(calculatedSize.width - 2 * padding + 10);
-	this.link.setY(calculatedSize.height - 2 * padding + 5 + clipMargin);
+	this.link.setX(calculatedSize.width - 2 * xpadding + 10);
+	this.link.setY(calculatedSize.height - 2 * ypadding + 5 + clipMargin);
 	positionTextAndIcon();
-	rectOffset = clipMargin;
+	rectOffset = clipMargin+jfm_extra_height/2;
+	this.clip.setY(jfm_extra_height/2);
 	_.each([this.rect, this.rectbg2, this.rectbg1], function (r) {
 		r.setWidth(calculatedSize.width);
-		r.setHeight(calculatedSize.height);
+		r.setHeight(calculatedSize.height-jfm_extra_height);
 		r.setY(rectOffset);
 		rectOffset += rectIncrement;
 		if (isDroppable) {
@@ -497,7 +506,7 @@ Kinetic.Idea.prototype.setStyle = function () {
 	this.rect.setStrokeWidth(this.isActivated ? 3 : self.rectAttrs.strokeWidth);
 	this.rectbg1.setVisible(this.isCollapsed());
 	this.rectbg2.setVisible(this.isCollapsed());
-	this.clip.setX(calculatedSize.width - padding);
+	this.clip.setX(calculatedSize.width - xpadding);
 	this.setupShadows();
 	this.text.setFill(MAPJS.contrastForeground(tintedBackground));
 };
