@@ -451,7 +451,7 @@ Kinetic.Idea.prototype.setStyle = function () {
 		calculatedSize = pad(textSize);
 	}
 	var jfm_extra_height=30;
-	if (this.mmAttr.jfm_is_leaf) jfm_extra_height=0;
+	if ((this.mmAttr||{}).jfm_is_leaf) jfm_extra_height=0;
 	calculatedSize.height+=jfm_extra_height;
 	
 	this.icon.updateMapjsAttribs(self.mmAttr && self.mmAttr.icon);
