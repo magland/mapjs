@@ -69,6 +69,65 @@
 		});
 		return group;
 	}
+	function create_jfm_toggle_collapse(expand) {
+		
+		var	icon = new Kinetic.Image({
+			x: 0,
+			y: 0,
+			width: 16,
+			height: 16
+		});
+		icon.init_image = function (collapsed) {
+			var self = this;
+			var imageSrc;
+			if (collapsed) imageSrc='$resources$/images/yusukekamiyamane/toggle-expand-2.png';
+			else imageSrc='$resources$/images/yusukekamiyamane/toggle-2.png';
+			//if (!this.getAttr('image')) {
+				this.setAttr('image', new Image());
+				//this.getAttr('image').onload = function loadImage() {
+				//	self.getLayer().draw();
+				//};
+				this.getAttr('image').src = imageSrc;
+			//}
+		};
+		icon.oldDrawScene = icon.drawScene;
+		icon.drawScene = function () {
+			if (!this.getAttr('image')) {
+				this.init_image();
+			}
+			this.oldDrawScene.apply(this, arguments);
+		};
+		
+		var group = new Kinetic.Group();
+		group.add(icon);
+		group.setCollapsed=function(val) {
+			icon.init_image(val);
+		}
+		return group;
+		
+		
+		
+		/*
+		var group, shape;
+		var props = {width: 12, height: 12, strokeWidth: 2};
+		group = new Kinetic.Group();
+		group.getClipMargin = function () {
+			return props.clipTo;
+		};
+		group.add(new Kinetic.jfm_toggle_collapse(_.extend({stroke: 'darkslategrey', x: 1, y: 1}, props)));
+		shape = new Kinetic.jfm_toggle_collapse(_.extend({stroke: 'skyblue', x: 0, y: 0}, props));
+		group.add(shape);
+		group.on('mouseover', function () {
+			shape.setStroke('black');
+			group.getLayer().draw();
+		});
+		group.on('mouseout', function () {
+			shape.setStroke('skyblue');
+			group.getLayer().draw();
+		});
+		return group;
+		*/
+	}
 	function createIcon() {
 		var	icon = new Kinetic.Image({
 			x: 0,
@@ -173,6 +232,10 @@
 		this.clip.on('click tap', function () {
 			self.fire(':request', {type: 'openAttachment', source: 'mouse'});
 		});
+		this.jfm_toggle_collapse=create_jfm_toggle_collapse();
+		this.jfm_toggle_collapse.on('click tab',function() {
+			self.fire(':request',{type:'toggleCollapse',source:'mouse'});
+		});
 		this.icon = createIcon();
 		this.add(this.rectbg1);
 		this.add(this.rectbg2);
@@ -181,6 +244,7 @@
 		this.add(this.text);
 		this.add(this.link);
 		this.add(this.clip);
+		this.add(this.jfm_toggle_collapse);
 		this.setText = function (text) {
 			var replacement = breakWords(MAPJS.URLHelper.stripLink(text)) ||
 					(text.length < COLUMN_WORD_WRAP_LIMIT ? text : (text.substring(0, COLUMN_WORD_WRAP_LIMIT) + '...'));
@@ -455,6 +519,13 @@ Kinetic.Idea.prototype.setStyle = function () {
 	calculatedSize.height+=jfm_extra_height;
 	
 	this.icon.updateMapjsAttribs(self.mmAttr && self.mmAttr.icon);
+	
+	this.jfm_toggle_collapse.setVisible(!(this.mmAttr||{}).jfm_is_leaf);
+	this.jfm_toggle_collapse.setY(calculatedSize.height/2-8+clipMargin);
+	this.jfm_toggle_collapse.setX(-16);
+	if (((this.mmAttr||{}).jfm_is_positive)&&(!(this.mmAttr||{}).jfm_is_root))
+		this.jfm_toggle_collapse.setX(calculatedSize.width);
+	this.jfm_toggle_collapse.setCollapsed(this.isCollapsed());
 
 	this.clip.setVisible(clipMargin);
 	this.setWidth(calculatedSize.width);
@@ -504,8 +575,14 @@ Kinetic.Idea.prototype.setStyle = function () {
 	}
 	this.rect.setDashArray(getDash());
 	this.rect.setStrokeWidth(this.isActivated ? 3 : self.rectAttrs.strokeWidth);
-	this.rectbg1.setVisible(this.isCollapsed());
-	this.rectbg2.setVisible(this.isCollapsed());
+	
+	//jfm removed these, since we have +/- icons for collapsing
+	//this.rectbg1.setVisible(this.isCollapsed());
+	//this.rectbg2.setVisible(this.isCollapsed());
+	this.rectbg1.setVisible(false);
+	this.rectbg2.setVisible(false);
+	//////////////////////////////////////////////
+	
 	this.clip.setX(calculatedSize.width - xpadding);
 	this.setupShadows();
 	this.text.setFill(MAPJS.contrastForeground(tintedBackground));

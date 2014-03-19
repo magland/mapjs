@@ -157,7 +157,8 @@ MAPJS.KineticMediator = function (mapModel, stage) {
 			opacity: 1,
 			id: 'node_' + n.id,
 			activated: n.activated,
-			jfm_is_leaf: (n.attr||{}).jfm_is_leaf //jfm
+			jfm_is_leaf: (n.attr||{}).jfm_is_leaf, //jfm
+			jfm_is_positive: (n.attr||{}).jfm_is_positive
 		});
 		node.on('click tap', function (evt) { mapModel.clickNode(n.id, evt); });
 		node.on('dblclick dbltap', function () {
@@ -217,7 +218,7 @@ MAPJS.KineticMediator = function (mapModel, stage) {
 	mapModel.addEventListener('nodeRemoved', function (n) {
 		var node = nodeByIdeaId[n.id];
 		delete nodeByIdeaId[n.id];
-		node.off('click dblclick tap dbltap dragstart dragmove dragend mouseover mouseout touchstart touchend :openAttachmentRequested :editing :textChanged ');
+		node.off('click dblclick tap dbltap dragstart dragmove dragend mouseover mouseout touchstart touchend :openAttachmentRequested :toggleCollapse :editing :textChanged ');
 	//	node.destroy();
 		new Kinetic.Tween({
 			node: node,

@@ -215,7 +215,14 @@ MAPJS.MapModel = function (layoutCalculator, selectAllTitles, clipboardProvider)
 		var node = currentLayout.nodes && currentLayout.nodes[id];
 		return node && node.attr && node.attr.style && node.attr.style[prop];
 	};
-	this.toggleCollapse = function (source) {
+	this.toggleCollapse = function (source,jfm_node_id) {
+		if (jfm_node_id) {
+			selectedIdea = self.findIdeaById(jfm_node_id);
+			if (!selectedIdea) return;
+			isCollapsed = selectedIdea.getAttr('collapsed');
+			idea.updateAttr(jfm_node_id, 'collapsed', !isCollapsed);
+			return;
+		}
 		var selectedIdea = currentlySelectedIdea(),
 			isCollapsed;
 		if (self.isActivated(selectedIdea.id) && _.size(selectedIdea.ideas) > 0) {
